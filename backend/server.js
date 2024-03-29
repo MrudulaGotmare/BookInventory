@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
 const User = require('./User'); // Import user model
+const path = require('path');
+
 
 const app = express();
 
@@ -22,11 +24,43 @@ mongoose.connection.once('open', () => {
 app.use(cors());
 app.use(express.json());
 
+// Set up static file serving
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Authentication route
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'index.html'));
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'login.html'));
+});
+
+app.get('/wishlist', (req, res) => {
+    // res.render('wishlist');
+    res.sendFile(path.join(__dirname, '..', 'wishlist.html'));
+});
+
+app.get('/readlist', (req, res) => {
+    // res.render('wishlist');
+    res.sendFile(path.join(__dirname, '..', 'readlist.html'));
+});
+
+app.get('/book', (req, res) => {
+    // res.render('wishlist');
+    res.sendFile(path.join(__dirname, '..', 'book.html'));
+});
+
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
+
     try {
+        console.log('Soham is grt and entered in the login');
+        // res.sendFile(path.join(__dirname, '..', 'wishlist.html'));
+
+
         // Find user by email
         const user = await User.findOne({ email });
 
