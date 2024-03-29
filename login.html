@@ -103,9 +103,9 @@
     </div>
 
     <script>
+        console.log("soham is a great man!");
         var app = angular.module('loginApp', []);
 
-        // AngularJS controller
         // AngularJS controller
         app.controller('loginCtrl', function ($scope, $http, $window) {
             $scope.submitForm = function () {
@@ -116,8 +116,12 @@
                         password: $scope.password
                     };
 
+                    console.log('Sending login request:', userData); // Log the request data
+
                     $http.post('/login', userData)
                         .then(response => {
+                            console.log('Login response:', response.data); // Log the response data
+
                             // Successful login, check response message
                             if (response.data.message === 'Login successful') {
                                 // Redirect to home page
@@ -129,22 +133,14 @@
                         })
                         .catch(error => {
                             // Error during login, display error message
-                            $scope.errorMessage = error.data.message;
+                            console.error('Error during login:', error);
+                            $scope.errorMessage = 'An error occurred during login. Please try again later.';
                         });
                 }
             };
         });
-
-
-        // app.controller('loginCtrl', function ($scope) {
-        //     $scope.submitForm = function () {
-        //         if ($scope.loginForm.$valid) {
-        //             // Form is valid, perform your login logic here
-        //             alert('Form submitted successfully');
-        //         }
-        //     };
-        // });
     </script>
+
 </body>
 
 </html>
