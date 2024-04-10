@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+</head>
+
+<body ng-app="bookApp">
+
+    <div ng-controller="BookDetailsController">
+        <div class="book-details-container">
+            <h2>Title: {{ selectedBook.title }}</h2>
+            <p>Author: {{ selectedBook.authors }}</p>
+            <img ng-src="{{ selectedBook.image_url }}" class="book-cover" alt="Book Cover"
+                onerror="this.src='placeholder.jpg'" />
+            <!-- Add more details here -->
+        </div>
+    </div>
+
+    <script>
+        angular.module("bookApp", []).controller("BookDetailsController", [
+            "$scope",
+            "$http",
+            "$routeParams", // Injecting $routeParams
+            function ($scope, $http, $routeParams) {
+                // Function to fetch book details based on the selected book ID
+                $scope.fetchBookDetails = function () {
+                    const bookId = $routeParams.bookId;
+                    $http.get(`https://raw.githubusercontent.com/zygmuntz/goodbooks-10k/master/books.csv/${bookId}`)
+                        .then(function (response) {
+                            var lines = response.data.split("\n");
+                            var headers = lines[0].split(",");
+
+                            for (var i = 1; i < lines.length; i++) {
+                                var bookData = lines[i].split(",");
+                                var currentBookId = bookData[0]; // Accessing bookId from the 1st column
+
+                                if (currentBookId === bookId) { // Check if the current bookId matches
+                                    var imageUrl = bookData[23]; // image URL is in the 22nd column
+                                    if (imageUrl && imageUrl.trim() !== "") {
+                                        $scope.selectedBook = { // Assigning data to selectedBook
+                                            title: bookData[10],
+                                            authors: bookData[7],
+                                            image_url: imageUrl,
+                                        };
+                                    }
+                                    break; // Stop looping once book is found
+                                }
+                            }
+                        })
+                        .catch(function (error) {
+                            console.error("Error fetching book details:", error);
+                        });
+                };
+
+                $scope.fetchBookDetails(bookId);
+            }
+        ]);
+    </script>
+</body>
+
+</html>
