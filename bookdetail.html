@@ -1,66 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
+<head ng-app="bookDetailApp">
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
 </head>
 
-<body ng-app="bookApp">
+<body ng-controller="BookDetailController">
 
-    <div ng-controller="BookDetailsController">
-        <div class="book-details-container">
-            <h2>Title: {{ selectedBook.title }}</h2>
-            <p>Author: {{ selectedBook.authors }}</p>
-            <img ng-src="{{ selectedBook.image_url }}" class="book-cover" alt="Book Cover"
-                onerror="this.src='placeholder.jpg'" />
-            <!-- Add more details here -->
-        </div>
+    <div>
+        <h1>{{ book.title }}</h1>
+        <p>Author: {{ book.author }}</p>
+        <p>Ratings: {{ book.ratings }}</p>
+        <p>Reviews: {{ book.reviews }}</p>
+        <p>Publication Year: {{ book.publicationYear }}</p>
+        <p>Summary: {{ book.summary }}</p>
+        <p>Awards:</p>
+        <ul>
+            <li ng-repeat="award in book.awards">{{ award }}</li>
+        </ul>
     </div>
 
     <script>
-        angular.module("bookApp", []).controller("BookDetailsController", [
+        angular.module("bookDetailApp", [])
+            .controller("BookDetailController", function ($scope, $http) {
+                // Function to retrieve book ID from URL
+                function getBookIdFromURL() {
+                    var urlParams = new URLSearchParams(window.location.search);
+                    return urlParams.get('bookId');
+                }
+
+                // Fetch the JSON file containing book details
+                $http.get('bookdetail.json')
+                    .then(function (response) {
+                        var bookId = getBookIdFromURL();
+                        var books = response.data;
+
+                        // Find the book details by ID
+                        $scope.book = books.find(function (item) {
+                            return item.id === parseInt(bookId);
+                        });
+
+                        if (!$scope.book) {
+                            console.error('Book not found.');
+                        }
+                    })
+                    .catch(function (error) {
+                        console.error('Error fetching book details:', error);
+                    });
+            });
+    </script>
+
+</body>
+
+</html>
+
+<!-- <script>
+        angular.module("bookApp", [])
+        .controller("BookDetailController", [
             "$scope",
             "$http",
-            "$routeParams", // Injecting $routeParams
-            function ($scope, $http, $routeParams) {
-                // Function to fetch book details based on the selected book ID
-                $scope.fetchBookDetails = function () {
-                    const bookId = $routeParams.bookId;
-                    $http.get(`https://raw.githubusercontent.com/zygmuntz/goodbooks-10k/master/books.csv/${bookId}`)
+            "$location",
+            function ($scope, $http, $location) {
+                console.log("Controller initialized");
+                // Extract book ID from URL
+                var searchParams = new URLSearchParams($location.search());
+                var bookId = searchParams.get("book_id");
+
+                console.log("Book ID extracted from URL:", bookId);
+
+                // Fetch book details from API using bookId
+                if (bookId) {
+                    console.log("Fetching book details for book ID:", bookId);
+                    $http
+                        .get("https://raw.githubusercontent.com/zygmuntz/goodbooks-10k/master/books.csv", {
+                            responseType: "text"
+                        })
                         .then(function (response) {
+                            console.log("API response received:", response);
                             var lines = response.data.split("\n");
                             var headers = lines[0].split(",");
 
                             for (var i = 1; i < lines.length; i++) {
                                 var bookData = lines[i].split(",");
-                                var currentBookId = bookData[0]; // Accessing bookId from the 1st column
+                                var currentBookId = bookData[0];
 
-                                if (currentBookId === bookId) { // Check if the current bookId matches
+                                if (currentBookId === bookId) {
                                     var imageUrl = bookData[23]; // image URL is in the 22nd column
-                                    if (imageUrl && imageUrl.trim() !== "") {
-                                        $scope.selectedBook = { // Assigning data to selectedBook
-                                            title: bookData[10],
-                                            authors: bookData[7],
-                                            image_url: imageUrl,
-                                        };
-                                    }
-                                    break; // Stop looping once book is found
+
+                                    $scope.book = {
+                                        title: bookData[10],
+                                        authors: bookData[7],
+                                        image_url: imageUrl,
+                                        // Add other properties as needed
+                                    };
+
+                                    console.log("Book details found:", $scope.book);
+
+                                    break;
                                 }
                             }
                         })
                         .catch(function (error) {
                             console.error("Error fetching book details:", error);
                         });
-                };
-
-                $scope.fetchBookDetails(bookId);
+                } else {
+                    console.error("No bookId parameter found in the URL.");
+                }
             }
         ]);
     </script>
+
 </body>
 
-</html>
+</html> -->

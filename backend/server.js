@@ -84,7 +84,7 @@ app.post("/login", async (req, res) => {
 
     // Password is valid, user is authenticated
     //res.status(200).json({ message: "Login successful", user });
-    res.sendFile(path.join(__dirname, "..", "wishlist.html"));
+    res.sendFile(path.join(__dirname, "..", "index.html"));
   } catch (error) {
     // Handle any errors
     console.error("Error during login:", error);

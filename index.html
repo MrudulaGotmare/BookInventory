@@ -103,6 +103,17 @@
             margin: 0;
             font-size: 14px;
             font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .custom-button {
+            background-color: white;
+            color: black;
+            border: 2px solid black;
+            border-radius: 50px;
+            padding: 7px 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
         }
     </style>
     <title>Login-Form</title>
@@ -126,7 +137,7 @@
                     <a href="readlist">Read List</a>
                 </li>
                 <li>
-                    <a href="wishlist">Wishlist</a>
+                    <a href="wishlist.html">Favourites</a>
                 </li>
                 <li>
                     <a href="#contact">Contact</a>
@@ -139,81 +150,115 @@
             </ul>
         </nav>
     </header>
-    <div ng-controller="HomeController">
-        <div class="search-container">
-            <form>
-                <input type="text" id="search" name="search" placeholder="Search...">
-                <button type="submit" ng-click="search()">Search</button>
-            </form>
-        </div>
-        <div class="suggestions-container">
-            <h2>Suggestions for you</h2>
-            <div class="book-grid">
-                <div ng-repeat="book in books | filter: searchText" class="book-container">
-                    <!-- <a href="#/bookdetail.html/{{ book.bookId }}" ng-click="fetchBookDetails(book.bookId)"> -->
-                        <img ng-src="{{ book.image_url }}" class="book-cover" alt="Book Cover"
+    <div ng-view>
+        <div ng-controller="HomeController">
+            <div class="search-container">
+                <form>
+                    <input type="text" id="search" name="search" placeholder="Search..." ng-model="searchText">
+                    <button type="submit" ng-click="search()">Search</button>
+                </form>
+            </div>
+            <div class="suggestions-container">
+                <h2>Suggestions for you</h2>
+                <div class="book-grid">
+                    <div ng-repeat="book in books | filter: searchText" class="book-container">
+
+                        <img ng-src="{{ book.image_url }}" class="book-cover" alt="Book Cover" book-info-dialog="book"
                             onerror="this.src='placeholder.jpg'" />
-                    <!-- </a> -->
-                    <h2 class="book-title">{{ book.title }}</h2>
-                    <p class="book-author">Author: {{ book.authors }}</p>
-                    <!-- <p class="book-author">Ratings: {{ book.ratings }}</p> -->
+
+                        <h2 class="book-title">{{ book.title }}</h2>
+                        <p class="book-author">Author: {{ book.authors }}</p>
+                        <button ng-click="addToFavorite(book)" class="add-to-favorite">Add to Favorite</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     <script>
-        angular.module("bookApp", []).controller("HomeController", [
-            "$scope",
-            "$http",
-            function ($scope, $http) {
-                $scope.books = [];
+        angular.module("bookApp", [])
+            // .config(function ($routeProvider) {
+            //     $routeProvider
+            //         .when("/", {
+            //             templateUrl: "index.html",
+            //             controller: "HomeController"
+            //         })
+            //         .when("/wishlist", {
+            //             templateUrl: "wishlist.html",
+            //             controller: "WishlistController"
+            //         })
+            //         .otherwise({
+            //             redirectTo: "/"
+            //         });
+            // })
+            .controller("HomeController", [
+                "$scope",
+                "$http",
+                "$window",
+                function ($scope, $http) {
+                    $scope.books = [];
+                    $scope.wishlist = []; // Array to store books in the wishlist
 
-                // $routeProvider
-                //     .when("/", { // Route for home page (already defined)
-                //         templateUrl: "index.html",
-                //         controller: "HomeController"
-                //     })
-                //     .when("/bookdetail/:bookId", { // Route for book detail page
-                //         templateUrl: "bookdetail.html", // Replace with your book detail template name
-                //         controller: "BookDetailController" // Define a new controller for book details
-                //     })
-                //     .otherwise({ // Route for any undefined routes
-                //         redirectTo: "/"
-                //     });
+                    $scope.addToFavorite = function (book) {
+                        // Add the selected book to the wishlist array
+                        $scope.wishlist.push(book);
+                        $window.alert("Book has been added to your wishlist!");
 
-                $http
-                    .get(
-                        "https://raw.githubusercontent.com/zygmuntz/goodbooks-10k/master/books.csv",
-                        { responseType: "text" }
-                    )
-                    .then(function (response) {
-                        var lines = response.data.split("\n");
-                        var headers = lines[0].split(",");
+                        // After adding to wishlist, navigate to the wishlist page
+                        $window.location.href = "wishlist.html";
+                        console.log("Redirecting to wishlist.html");
+                    };
 
-                        for (var i = 1; i < lines.length; i++) {
-                            var bookData = lines[i].split(",");
-                            var imageUrl = bookData[23];
-                            var bookId = bookData[0] // image URL is in the 22nd column
+                    $http
+                        .get(
+                            "https://raw.githubusercontent.com/zygmuntz/goodbooks-10k/master/books.csv",
+                            { responseType: "text" }
+                        )
+                        .then(function (response) {
+                            var lines = response.data.split("\n");
+                            var headers = lines[0].split(",");
 
-                            // Check if the image URL is not empty
-                            if (imageUrl && imageUrl.trim() !== "") {
-                                $scope.books.push({
-                                    title: bookData[10],
-                                    authors: bookData[7],
-                                    image_url: imageUrl,
-                                    // ratings: bookData[13],
-                                });
+
+                            for (var i = 1; i < lines.length; i++) {
+                                var bookData = lines[i].split(",");
+                                var imageUrl = bookData[23]; // image URL is in the 22nd column
+
+
+                                // Check if the image URL is not empty
+                                if (imageUrl && imageUrl.trim() !== "") {
+                                    $scope.books.push({
+                                        id: bookData[0],
+                                        title: bookData[10],
+                                        authors: bookData[7],
+                                        year: bookData[8],
+                                        average_rating: bookData[13],
+                                        image_url: imageUrl,
+
+
+                                        description: bookData[5], // Add description to book object
+                                    });
+                                }
                             }
-                        }
-                    })
-                    .catch(function (error) {
-                        console.error("Error fetching book details:", error);
-                    });
-            },
-        ]);
-    </script>
+                        })
+                        .catch(function (error) {
+                            console.error("Error fetching book details:", error);
+                        });
+                },
+            ])
+            .directive("bookInfoDialog", function () {
+                return {
+                    restrict: "A",
+                    link: function (scope, element, attrs) {
+                        element.on("click", function () {
+                            var book = scope.$eval(attrs.bookInfoDialog);
+                            alert("Book ID: " + book.id + "\nBook Title: " + book.title + "\nAuthor: " + book.authors + "\nRating: " + book.average_rating);
+                            // You can replace the alert with a custom dialog/modal to display book details
+                        });
+                    },
+                };
+            })
 
-    <!-- <script src="javascript/index.js"></script> -->
+           
+    </script>
 </body>
 
 </html>

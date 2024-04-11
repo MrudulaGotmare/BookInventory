@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -57,7 +59,8 @@
     </style>
 </head>
 
-<body>
+<body ng-app="bookApp">
+
     <header id="header">
         <div class="logo"><a href="">Minimal</a> </div>
         <div class="hamburger" id="toggle">
@@ -87,25 +90,29 @@
             </ul>
         </nav>
     </header>
-    <div class="book-container">
-        <img src="images/book1.jpg" alt="Book 1">
-        <div class="book-details">
-            <h3>Book Title 1</h3>
-            <p>Author: Author Name 1</p>
-            <p class="price">Price: $19.99</p>
-            <p class="stars">Stars: ★★★★☆</p>
+    <div ng-view>
+        <div ng-controller="WishlistController">
+            <div class="book-container">
+                <img src="images/book1.jpg" alt="Book 1">
+                <div class="book-details">
+                    <h3>Book Title 1</h3>
+                    <p>Author: Author Name 1</p>
+                    <p class="price">Price: $19.99</p>
+                    <p class="stars">Stars: ★★★★☆</p>
+                </div>
+            </div>
+            <div class="book-container">
+                <img src="images/book2.jpg" alt="Book 1">
+                <div class="book-details">
+                    <h3>Book Title 1</h3>
+                    <p>Author: Author Name 1</p>
+                    <p class="price">Price: $19.99</p>
+                    <p class="stars">Stars: ★★★★☆</p>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="book-container">
-        <img src="images/book2.jpg" alt="Book 1">
-        <div class="book-details">
-            <h3>Book Title 1</h3>
-            <p>Author: Author Name 1</p>
-            <p class="price">Price: $19.99</p>
-            <p class="stars">Stars: ★★★★☆</p>
-        </div>
-    </div>
-    <script src="javascript/index.js"></script>
+    <script src="app.js"></script>
 </body>
 
 </html>
