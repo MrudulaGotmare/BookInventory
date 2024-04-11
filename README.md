@@ -40,7 +40,7 @@
 
 * [HTML](https://www.w3schools.com/html/#gsc.tab=0)
 * [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS)
-* [Javascript](https://www.w3schools.com/js/js_intro.asp)
+* [Angular JS]
 
 
 
@@ -52,7 +52,7 @@
 
 ### Installation
 ```sh
-  git clone https://github.com/ShivaBhattacharjee/login
+  git clone
   
   cd minimal-login-form
   
@@ -60,13 +60,7 @@
   
 ```
 
-## License
 
-Distributed under the GNU GENERAL PUBLIC LICENSE. See [LICENSE](https://github.com/ShivaBhattacharjee/minimal-login-form/blob/main/LICENSE) for more information
-
-## Authors
-
-* **Shiva Bhattacharjee** - [Shiva Bhattacharjee](https://github.com/ShivaBhattacharjee) 
 
 
 
