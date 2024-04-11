@@ -120,93 +120,107 @@
 </head>
 
 <body ng-app="bookApp">
+    <div ng-controller="HomeController">
 
-    <header id="header">
-        <div class="logo"><a href="">Minimal</a> </div>
-        <div class="hamburger" id="toggle">
-            <div class="line"></div>
-            <div class="line"></div>
-            <div class="line"></div>
-        </div>
-        <nav class="nav-bar" id="navbar">
-            <ul>
-                <li>
-                    <a href="index.html" class="active">Home</a>
-                </li>
-                <li>
-                    <a href="readlist">Read List</a>
-                </li>
-                <li>
-                    <a href="wishlist.html">Favourites</a>
-                </li>
-                <li>
-                    <a href="#contact">Contact</a>
-                </li>
-                <div class="login">
-                    <li>
-                        <a href="login" class="navlogin active">Login</a>
-                    </li>
-                </div>
-            </ul>
-        </nav>
-    </header>
-    <div ng-view>
-        <div ng-controller="HomeController">
-            <div class="search-container">
-                <form>
-                    <input type="text" id="search" name="search" placeholder="Search..." ng-model="searchText">
-                    <button type="submit" ng-click="search()">Search</button>
-                </form>
+        <header id="header">
+            <div class="logo"><a href="">Minimal</a> </div>
+            <div class="hamburger" id="toggle">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
             </div>
-            <div class="suggestions-container">
-                <h2>Suggestions for you</h2>
-                <div class="book-grid">
-                    <div ng-repeat="book in books | filter: searchText" class="book-container">
-
-                        <img ng-src="{{ book.image_url }}" class="book-cover" alt="Book Cover" book-info-dialog="book"
-                            onerror="this.src='placeholder.jpg'" />
-
-                        <h2 class="book-title">{{ book.title }}</h2>
-                        <p class="book-author">Author: {{ book.authors }}</p>
-                        <button ng-click="addToFavorite(book)" class="add-to-favorite">Add to Favorite</button>
+            <nav class="nav-bar" id="navbar">
+                <ul>
+                    <li>
+                        <a href="index.html" class="active">Home</a>
+                    </li>
+                    <li>
+                        <a href="readlist">Read List</a>
+                    </li>
+                    <li>
+                        <a href="wishlist">Wishlist</a>
+                    </li>
+                    <li>
+                        <a href="#!contact">Contact</a>
+                    </li>
+                    <div class="login">
+                        <li>
+                            <a href="login" class="navlogin active">Login</a>
+                        </li>
                     </div>
+                </ul>
+            </nav>
+        </header>
+
+
+        <!-- <div>
+            <a href="#!favorite">Favorites</a>
+            <a href="#!wishlist">WishList</a>
+        </div> -->
+        <div ng-view></div>
+
+        <div class="search-container">
+            <form>
+                <input type="text" id="search" name="search" placeholder="Search..." ng-model="searchText">
+                <button type="submit" ng-click="search()">Search</button>
+            </form>
+        </div>
+        <div class="sort-dropdown">
+            <label for="ratingSort">Sort by Rating:</label>
+            <select id="ratingSort" ng-model="selectedRating" ng-change="sortBooksByRating()">
+                <option value="" disabled selected>Select a rating</option>
+                <option value="5">4.5 - 5</option>
+                <option value="4">3.5 - 4.4</option>
+                <option value="3">2.5 - 3.4</option>
+                <option value="2">Below 2.5</option>
+                <option value="1">Below 1.5</option>
+            </select>
+        </div>
+
+        <div class="suggestions-container">
+            <h2>Suggestions for you</h2>
+            <div class="book-grid">
+                <div ng-repeat="book in books | filter: searchText" class="book-container">
+
+                    <img ng-src="{{ book.image_url }}" class="book-cover" alt="Book Cover" book-info-dialog="book"
+                        onerror="this.src='placeholder.jpg'" />
+
+                    <h2 class="book-title">{{ book.title }}</h2>
+                    <p class="book-author">Author: {{ book.authors }}</p>
+                    <p class="book-rating">Rating: {{ book.average_rating }}</p>
+                    <button ng-click="addToFavorite(book)" class="add-to-favorite">Add to Favorite</button>
                 </div>
             </div>
         </div>
     </div>
     <script>
-        angular.module("bookApp", [])
-            // .config(function ($routeProvider) {
-            //     $routeProvider
-            //         .when("/", {
-            //             templateUrl: "index.html",
-            //             controller: "HomeController"
-            //         })
-            //         .when("/wishlist", {
-            //             templateUrl: "wishlist.html",
-            //             controller: "WishlistController"
-            //         })
-            //         .otherwise({
-            //             redirectTo: "/"
-            //         });
-            // })
+        angular
+            .module("bookApp", ["ngRoute"])
             .controller("HomeController", [
                 "$scope",
                 "$http",
-                "$window",
-                function ($scope, $http) {
+                "SortingService",
+                function ($scope, $http, SortingService) {
                     $scope.books = [];
-                    $scope.wishlist = []; // Array to store books in the wishlist
+                    $scope.selectedRating = ""; // Initialize selectedRating
 
-                    $scope.addToFavorite = function (book) {
-                        // Add the selected book to the wishlist array
-                        $scope.wishlist.push(book);
-                        $window.alert("Book has been added to your wishlist!");
 
-                        // After adding to wishlist, navigate to the wishlist page
-                        $window.location.href = "wishlist.html";
-                        console.log("Redirecting to wishlist.html");
+                    // Function to sort books based on selected rating
+                    $scope.sortBooksByRating = function () {
+                        $scope.sortedBooks = SortingService.sortByRating(
+                            $scope.books,
+                            $scope.selectedRating
+                        );
                     };
+
+
+                    // Watch for changes in the selected rating
+                    $scope.$watch("selectedRating", function (newValue, oldValue) {
+                        if (newValue !== oldValue) {
+                            $scope.sortBooksByRating();
+                        }
+                    });
+
 
                     $http
                         .get(
@@ -221,6 +235,7 @@
                             for (var i = 1; i < lines.length; i++) {
                                 var bookData = lines[i].split(",");
                                 var imageUrl = bookData[23]; // image URL is in the 22nd column
+                                var avg_rating = bookData[13];
 
 
                                 // Check if the image URL is not empty
@@ -230,10 +245,8 @@
                                         title: bookData[10],
                                         authors: bookData[7],
                                         year: bookData[8],
-                                        average_rating: bookData[13],
                                         image_url: imageUrl,
-
-
+                                        average_rating: avg_rating,
                                         description: bookData[5], // Add description to book object
                                     });
                                 }
@@ -244,21 +257,54 @@
                         });
                 },
             ])
+            .config(function ($routeProvider) {
+                $routeProvider
+                    .when("/", {
+                        template:
+                            "",
+                    })
+                    .when("/contact", {
+                        template: "<h1>Contact</h1><p>contains already read books</p>",
+                    })
+
+            })
+
             .directive("bookInfoDialog", function () {
                 return {
                     restrict: "A",
                     link: function (scope, element, attrs) {
                         element.on("click", function () {
                             var book = scope.$eval(attrs.bookInfoDialog);
-                            alert("Book ID: " + book.id + "\nBook Title: " + book.title + "\nAuthor: " + book.authors + "\nRating: " + book.average_rating);
+                            alert(
+                                "Book ID: " +
+                                book.id +
+                                "\nBook Title: " +
+                                book.title +
+                                "\nAuthor: " +
+                                book.authors +
+                                "\nRating: " +
+                                book.average_rating
+                            );
                             // You can replace the alert with a custom dialog/modal to display book details
                         });
                     },
                 };
             })
 
-           
+
+            .service("SortingService", function () {
+                // Function to sort books by rating
+                this.sortByRating = function (books, selectedRating) {
+                    if (!selectedRating) return books; // If no rating selected, return unsorted books
+                    return books.filter(function (book) {
+                        return (
+                            Math.round(book.average_rating) === parseInt(selectedRating)
+                        );
+                    });
+                };
+            });
     </script>
+
 </body>
 
 </html>
